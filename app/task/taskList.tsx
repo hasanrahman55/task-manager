@@ -1,8 +1,8 @@
-import { View, Text, SafeAreaView, Button, FlatList, StyleSheet } from 'react-native';
+import { View, Text, SafeAreaView, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from "expo-router";
 import { db, auth } from '../../firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { Task } from "../../type";
 import { signOut } from 'firebase/auth';
 
@@ -26,17 +26,36 @@ export default function TaskList() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            router.replace('/auth/login'); 
+            router.replace('/auth/login'); // Redirect to login page after logout
         } catch (error) {
             console.error("Error logging out:", error);
         }
     };
 
-    useEffect(() => {
-        
-        if(!auth.currentUser){
-            router.replace('/auth/login')
+    const handleDelete = async (taskId: string) => {
+        try {
+            await deleteDoc(doc(db, 'task', taskId));
+            fetchTasks(); // Refresh the task list after deletion
+        } catch (error) {
+            console.error("Error deleting task:", error);
         }
+    };
+
+    const confirmDelete = (taskId: string) => {
+        Alert.alert(
+            "Delete Task",
+            "Are you sure you want to delete this task?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "OK", onPress: () => handleDelete(taskId) }
+            ]
+        );
+    };
+
+    useEffect(() => {
         fetchTasks();
     }, []);
 
@@ -55,6 +74,11 @@ export default function TaskList() {
                         <Text style={styles.taskTitle}>{item.title}</Text>
                         <Text style={styles.taskDetail}>{item.detail}</Text>
                         <Text style={styles.taskStatus}>{item.status}</Text>
+                        <View style={styles.buttonContainer}>
+                            <Button title='Edit' onPress={() => router.push(`/task/addTask?id=${item.id}`)} color="#2196F3" />
+
+                            <Button title='Delete' onPress={() => confirmDelete(item.id)} color="#F44336" />
+                        </View>
                     </View>
                 )}
                 contentContainerStyle={styles.listContainer}
@@ -96,7 +120,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 4,
         elevation: 2, // For Android
-        marginHorizontal:20,
     },
     taskTitle: {
         fontSize: 18,
@@ -109,5 +132,10 @@ const styles = StyleSheet.create({
     taskStatus: {
         fontSize: 12,
         color: '#888',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 8,
     },
 });

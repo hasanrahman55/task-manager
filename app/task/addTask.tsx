@@ -1,36 +1,59 @@
 import { View, Text, SafeAreaView, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
-import { useRouter } from "expo-router";
+import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 const AddTask = () => {
     const [title, setTitle] = useState('');
     const [detail, setDetail] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
     const router = useRouter();
+    const { id } = useLocalSearchParams(); // Retrieve the 'id' parameter
 
-    const handleAddTask = async () => {
+    useEffect(() => {
+        // Check if we are editing an existing task
+        if (id) {
+            setIsEditing(true);
+            fetchTask(id);
+        }
+    }, [id]);
+
+    const fetchTask = async (taskId) => {
+        const taskDoc = await getDoc(doc(db, 'task', taskId));
+        if (taskDoc.exists()) {
+            const taskData = taskDoc.data();
+            setTitle(taskData.title);
+            setDetail(taskData.detail);
+        }
+    };
+
+    const handleSubmit = async () => {
         try {
             const user = auth.currentUser;
             if (!user) return;
 
-            const task = {
-                title: title,
-                detail: detail,
-                userId: user.uid,
-            };
+            if (isEditing) {
+                await updateDoc(doc(db, 'task', id), { title, detail });
+            } else {
+                const task = {
+                    title,
+                    detail,
+                    userId: user.uid,
+                };
+                await addDoc(collection(db, 'task'), task);
+            }
 
-            await addDoc(collection(db, 'task'), task);
             router.replace('/task/taskList');
         } catch (error) {
-            console.error('Error adding task: ', error);
+            console.error('Error saving task: ', error);
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.formContainer}>
-                <Text style={styles.title}>Add New Task</Text>
+                <Text style={styles.title}>{isEditing ? 'Edit Task' : 'Add New Task'}</Text>
 
                 <TextInput
                     placeholder='Task Title'
@@ -52,8 +75,8 @@ const AddTask = () => {
                     placeholderTextColor="#888"
                 />
 
-                <TouchableOpacity style={styles.button} onPress={handleAddTask}>
-                    <Text style={styles.buttonText}>Add Task</Text>
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                    <Text style={styles.buttonText}>{isEditing ? 'Update Task' : 'Add Task'}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.cancelButton} onPress={() => router.replace('/task/taskList')}>
@@ -65,6 +88,9 @@ const AddTask = () => {
 };
 
 export default AddTask;
+
+//... [styles remain the same]
+
 
 const styles = StyleSheet.create({
     container: {
