@@ -26,13 +26,17 @@ export default function TaskList() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            router.replace('/auth/login'); // Redirect to login page after logout
+            router.replace('/auth/login'); 
         } catch (error) {
             console.error("Error logging out:", error);
         }
     };
 
     useEffect(() => {
+        
+        if(!auth.currentUser){
+            router.replace('/auth/login')
+        }
         fetchTasks();
     }, []);
 
