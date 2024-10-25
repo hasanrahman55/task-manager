@@ -10,7 +10,6 @@ export default function index() {
             <View>
                 <Text>index</Text>
                 <Button title='go to sign up' onPress={() => route.push('/auth/signup')} />
-
             </View>
         </SafeAreaView>
 

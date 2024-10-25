@@ -13,7 +13,7 @@ const Login = () => {
     const handleLogin = async () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            router.push('/');
+            router.push('/task/taskList');
         } catch (error) {
             console.error(error);
         }
@@ -22,8 +22,8 @@ const Login = () => {
     return (
         <SafeAreaView>
             <View>
-                <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
-                <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+                <TextInput placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize='none'/>
+                <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize='none'/>
                 <Button title="Login" onPress={handleLogin} />
                 <Text onPress={() => router.push('/auth/signup')}>Don't have an account? Sign Up</Text>
             </View>
