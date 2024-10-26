@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../firebaseConfig';
 import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { Status } from "../../type";
 
 const AddTask = () => {
     const [title, setTitle] = useState('');
@@ -34,12 +35,14 @@ const AddTask = () => {
             if (!user) return;
 
             if (isEditing) {
-                await updateDoc(doc(db, 'task', id), { title, detail });
+                await updateDoc(doc(db, 'task', id), { title, detail , updatedAt: new Date()});
             } else {
                 const task = {
                     title,
                     detail,
                     userId: user.uid,
+                    status:Status.Pending,
+                    createdAt: new Date(),
                 };
                 await addDoc(collection(db, 'task'), task);
             }
