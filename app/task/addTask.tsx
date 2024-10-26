@@ -10,10 +10,9 @@ const AddTask = () => {
     const [detail, setDetail] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const router = useRouter();
-    const { id } = useLocalSearchParams(); // Retrieve the 'id' parameter
+    const { id } = useLocalSearchParams(); 
 
     useEffect(() => {
-        // Check if we are editing an existing task
         if (id) {
             setIsEditing(true);
             fetchTask(id);

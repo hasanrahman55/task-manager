@@ -5,7 +5,7 @@ import { auth } from "../firebaseConfig";
 export default function RootLayout() {
   const router = useRouter()
   useEffect(() => {
-  const unsubscribe =  auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
         router.push('/auth/login')
       }
@@ -15,5 +15,5 @@ export default function RootLayout() {
   }, [])
 
 
-  return <Slot/>
+  return <Slot />
 }

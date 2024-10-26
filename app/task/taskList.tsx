@@ -12,7 +12,7 @@ export default function TaskList() {
     const [dialogVisible, setDialogVisible] = useState(false);
     const [menuVisible, setMenuVisible] = useState(false);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-    const [selectedStatus, setSelectedStatus] = useState<Status | 'All'>('All'); // Added status filter state
+    const [selectedStatus, setSelectedStatus] = useState<Status | 'All'>('All'); 
     const router = useRouter();
 
     const fetchTasks = async () => {
